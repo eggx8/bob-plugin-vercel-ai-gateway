@@ -2,6 +2,12 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.2] - 2026-07-22
+
+### Changed
+
+- 使用用户提供的黑色 Vercel 三角标并移除图标背景
+
 ## [0.3.1] - 2026-07-22
 
 ### Fixed

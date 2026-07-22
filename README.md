@@ -26,7 +26,7 @@
 
 从 [Releases](https://github.com/eggx8/bob-plugin-vercel-ai-gateway/releases) 下载最新版 `.bobplugin`，双击完成安装。
 
-也可以直接下载仓库中的 [vercel-ai-gateway_0.3.1.bobplugin](bobplugin/vercel-ai-gateway_0.3.1.bobplugin)。
+也可以直接下载仓库中的 [vercel-ai-gateway_0.3.2.bobplugin](bobplugin/vercel-ai-gateway_0.3.2.bobplugin)。
 
 ## 配置
 
