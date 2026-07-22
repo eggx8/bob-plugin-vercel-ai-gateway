@@ -67,6 +67,10 @@ test("development documentation and workflows use pnpm", () => {
       contents,
       /actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7\.0\.0/,
     );
+    assert.match(
+      contents,
+      /pnpm\/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6\.0\.9/,
+    );
   }
 });
 
