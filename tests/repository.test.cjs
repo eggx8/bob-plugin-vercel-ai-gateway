@@ -56,6 +56,18 @@ test("development documentation and workflows use pnpm", () => {
     const contents = fs.readFileSync(path.join(projectRoot, file), "utf8");
     assert.doesNotMatch(contents, /\bnpm\b/i);
   }
+
+  for (const file of files.slice(2)) {
+    const contents = fs.readFileSync(path.join(projectRoot, file), "utf8");
+    assert.match(
+      contents,
+      /actions\/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\.0\.1/,
+    );
+    assert.match(
+      contents,
+      /actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7\.0\.0/,
+    );
+  }
 });
 
 test("icon is a 256 by 256 PNG", () => {
