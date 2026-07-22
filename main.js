@@ -189,7 +189,7 @@ function translate(query, completion) {
       return;
     }
 
-    query.onStream(buildResult());
+    query.onStream({ result: buildResult() });
   }
 
   function finishWithError(type, message, addition) {

@@ -1,6 +1,6 @@
 {
   "name": "bob-plugin-vercel-ai-gateway",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "description": "A minimal Bob translation plugin for Vercel AI Gateway.",

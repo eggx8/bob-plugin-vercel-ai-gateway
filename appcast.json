@@ -2,6 +2,14 @@
   "identifier": "com.eggx8.translate.vercelaigateway",
   "versions": [
     {
+      "version": "0.3.3",
+      "desc": "修复 Bob 无法实时渲染流式思考内容和译文的问题",
+      "sha256": "f38df1968ed14d98cdf47561d3b0b97616ce5ee3f52bc47618f469149e27eebe",
+      "url": "https://raw.githubusercontent.com/eggx8/bob-plugin-vercel-ai-gateway/main/bobplugin/vercel-ai-gateway_0.3.3.bobplugin",
+      "minBobVersion": "1.15.0",
+      "timestamp": 1784728335000
+    },
+    {
       "version": "0.3.2",
       "desc": "使用用户提供的黑色 Vercel 三角标并移除图标背景",
       "sha256": "9c757824ad4529e6f415158efa9c66b082e07b89c41f18ddda225b6a50e3352b",

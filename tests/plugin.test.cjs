@@ -59,6 +59,7 @@ function createHarness(options = {}) {
 
 function createQuery(overrides = {}) {
   const streams = [];
+  const streamCalls = [];
   const completions = [];
   const query = {
     text: "Hello",
@@ -69,7 +70,11 @@ function createQuery(overrides = {}) {
     detectTo: "zh-Hans",
     cancelSignal: { id: "cancel-signal" },
     onStream(value) {
-      streams.push(normalize(value));
+      const call = normalize(value);
+      streamCalls.push(call);
+      if (call && call.result) {
+        streams.push(call.result);
+      }
     },
     onCompletion(value) {
       completions.push(normalize(value));
@@ -77,7 +82,7 @@ function createQuery(overrides = {}) {
     ...overrides,
   };
 
-  return { query, streams, completions };
+  return { query, streams, streamCalls, completions };
 }
 
 function normalize(value) {
@@ -115,6 +120,26 @@ test("builds the minimal Gateway request and preserves original formatting", () 
   assert.match(harness.request.body.messages[1].content, /English to Chinese \(Simplified\)/);
   assert.match(harness.request.body.messages[1].content, /Hello\nworld$/);
   assert.equal(harness.request.cancelSignal, state.query.cancelSignal);
+});
+
+test("wraps streaming updates in Bob's result envelope", () => {
+  const harness = createHarness();
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  harness.request.streamHandler({
+    text: 'data: {"choices":[{"delta":{"content":"你"}}]}\n\n',
+  });
+
+  assert.deepEqual(state.streamCalls, [
+    {
+      result: {
+        from: "en",
+        to: "zh-Hans",
+        toParagraphs: ["你"],
+      },
+    },
+  ]);
 });
 
 test("parses fragmented SSE and separates reasoning from translation", () => {

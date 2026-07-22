@@ -1,6 +1,6 @@
 {
   "identifier": "com.eggx8.translate.vercelaigateway",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "category": "translate",
   "name": "Vercel AI Gateway",
   "summary": "通过 Vercel AI Gateway 调用大模型进行流式翻译",

@@ -2,6 +2,12 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.3] - 2026-07-22
+
+### Fixed
+
+- 使用 Bob 实际接受的 `{ result: translateResult }` 结构回传流式增量，修复思考内容和译文只在结束时显示
+
 ## [0.3.2] - 2026-07-22
 
 ### Changed
