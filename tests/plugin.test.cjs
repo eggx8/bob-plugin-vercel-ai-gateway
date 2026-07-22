@@ -111,6 +111,7 @@ test("parses fragmented SSE and separates reasoning from translation", () => {
     'data: {"choices":[{"delta":{"reasoning":"先分析"}}]}\r\n\r\n',
     'data: {"choices":[{"delta":{"content":"你好"}}]}\n\n',
     'data: {"choices":[{"delta":{"reasoning":"再确认","content":"，世界"}}]}\n\n',
+    'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
     "data: [DONE]\n\n",
   ].join("");
 
@@ -123,15 +124,37 @@ test("parses fragmented SSE and separates reasoning from translation", () => {
   harness.request.handler({ response: { statusCode: 200 } });
 
   assert.ok(state.streams.length >= 3);
-  assert.deepEqual(state.streams.at(-1), {
-    result: {
-      from: "en",
-      to: "zh-Hans",
-      toParagraphs: ["你好，世界"],
-      thinkInfo: { content: "先分析再确认" },
-    },
+  const expectedResult = {
+    from: "en",
+    to: "zh-Hans",
+    toParagraphs: ["你好，世界"],
+    thinkInfo: { content: "先分析再确认" },
+  };
+  assert.deepEqual(state.streams.at(-1), expectedResult);
+  assert.deepEqual(state.completions, [{ result: expectedResult }]);
+});
+
+test("streams CR-only SSE and handles CRLF split between chunks", () => {
+  const harness = createHarness();
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  harness.request.streamHandler({
+    text: 'data: {"choices":[{"delta":{"content":"你"}}]}\r\r',
   });
-  assert.deepEqual(state.completions, [state.streams.at(-1)]);
+  assert.deepEqual(state.streams.at(-1).toParagraphs, ["你"]);
+
+  harness.request.streamHandler({
+    text: 'data: {"choices":[{"delta":{"content":"好"}}]}\r',
+  });
+  harness.request.streamHandler({ text: "\n\r" });
+  assert.deepEqual(state.streams.at(-1).toParagraphs, ["你好"]);
+
+  harness.request.streamHandler({
+    text: '\ndata: {"choices":[{"delta":{},"finish_reason":"stop"}]}\r\n\r\n',
+  });
+  harness.request.handler({ response: { statusCode: 200 } });
+  assert.deepEqual(state.completions[0].result.toParagraphs, ["你好"]);
 });
 
 test("reports missing credentials without starting a request", () => {
@@ -177,4 +200,53 @@ test("completes only once when an SSE error is followed by the HTTP handler", ()
   assert.equal(state.completions.length, 1);
   assert.equal(state.completions[0].error.type, "api");
   assert.equal(state.completions[0].error.message, "model unavailable");
+});
+
+test("rejects malformed, truncated, and incomplete streams", () => {
+  const cases = [
+    {
+      chunks: [
+        'data: {"choices":[{"delta":{"content":"部分"}}]}\n\n',
+        "data: {broken json}\n\n",
+        'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      ],
+      expectedType: "api",
+      message: /无法解析/,
+    },
+    {
+      chunks: [
+        'data: {"choices":[{"delta":{"content":"部分"}}]}\n\n',
+        'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\n',
+      ],
+      expectedType: "api",
+      message: /长度限制/,
+    },
+    {
+      chunks: [
+        'data: {"choices":[{"delta":{"content":"部分"}}]}\n\n',
+        'data: {"choices":[{"delta":{},"finish_reason":"content_filter"}]}\n\n',
+      ],
+      expectedType: "api",
+      message: /安全策略/,
+    },
+    {
+      chunks: ['data: {"choices":[{"delta":{"content":"部分"}}]}\n\n'],
+      expectedType: "network",
+      message: /完成前中断/,
+    },
+  ];
+
+  for (const item of cases) {
+    const harness = createHarness();
+    const state = createQuery();
+    harness.context.translate(state.query);
+    for (const chunk of item.chunks) {
+      harness.request.streamHandler({ text: chunk });
+    }
+    harness.request.handler({ response: { statusCode: 200 } });
+
+    assert.equal(state.completions.length, 1);
+    assert.equal(state.completions[0].error.type, item.expectedType);
+    assert.match(state.completions[0].error.message, item.message);
+  }
 });

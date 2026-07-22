@@ -57,8 +57,11 @@ function translate(query, completion) {
   var translatedText = "";
   var reasoningText = "";
   var streamBuffer = "";
+  var skipLineFeed = false;
   var rawResponse = "";
   var gatewayError = null;
+  var streamParseError = false;
+  var finishReason = null;
   var finished = false;
 
   var requestBody = {
@@ -102,7 +105,7 @@ function translate(query, completion) {
       return;
     }
 
-    query.onStream({ result: buildResult() });
+    query.onStream(buildResult());
   }
 
   function finishWithError(type, message, addition) {
@@ -158,6 +161,7 @@ function translate(query, completion) {
     try {
       payload = JSON.parse(eventData);
     } catch (_error) {
+      streamParseError = true;
       return;
     }
 
@@ -167,7 +171,16 @@ function translate(query, completion) {
     }
 
     var choices = payload && payload.choices;
-    var delta = choices && choices[0] && choices[0].delta;
+    var choice = choices && choices[0];
+    if (!choice) {
+      return;
+    }
+
+    if (typeof choice.finish_reason === "string") {
+      finishReason = choice.finish_reason;
+    }
+
+    var delta = choice.delta;
     if (!delta) {
       return;
     }
@@ -188,11 +201,31 @@ function translate(query, completion) {
     }
   }
 
-  function consumeSseBuffer(flush) {
-    var normalized = streamBuffer.replace(/\r\n/g, "\n");
-    if (flush) {
-      normalized = normalized.replace(/\r/g, "\n");
+  function appendStreamText(text) {
+    var normalized = "";
+
+    for (var index = 0; index < text.length; index += 1) {
+      var character = text.charAt(index);
+      if (skipLineFeed) {
+        skipLineFeed = false;
+        if (character === "\n") {
+          continue;
+        }
+      }
+
+      if (character === "\r") {
+        normalized += "\n";
+        skipLineFeed = true;
+      } else {
+        normalized += character;
+      }
     }
+
+    streamBuffer += normalized;
+  }
+
+  function consumeSseBuffer(flush) {
+    var normalized = streamBuffer;
 
     var boundary = normalized.indexOf("\n\n");
     while (boundary !== -1) {
@@ -228,7 +261,7 @@ function translate(query, completion) {
         if (rawResponse.length < 16384) {
           rawResponse += stream.text.slice(0, 16384 - rawResponse.length);
         }
-        streamBuffer += stream.text;
+        appendStreamText(stream.text);
         consumeSseBuffer(false);
       },
       handler: function (response) {
@@ -263,6 +296,34 @@ function translate(query, completion) {
             gatewayError.message || "AI Gateway 返回了错误。",
             errorAddition(statusCode, gatewayError),
           );
+          return;
+        }
+
+        if (streamParseError) {
+          finishWithError("api", "AI Gateway 返回了无法解析的流式数据。");
+          return;
+        }
+
+        if (finishReason === "length") {
+          finishWithError("api", "模型输出达到长度限制，译文可能不完整。");
+          return;
+        }
+
+        if (finishReason === "content_filter") {
+          finishWithError("api", "模型输出被内容安全策略截断。");
+          return;
+        }
+
+        if (finishReason && finishReason !== "stop") {
+          finishWithError(
+            "api",
+            "模型以不支持的原因结束生成：" + finishReason + "。",
+          );
+          return;
+        }
+
+        if (!finishReason) {
+          finishWithError("network", "AI Gateway 流式响应在完成前中断。");
           return;
         }
 

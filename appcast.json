@@ -4,7 +4,7 @@
     {
       "version": "0.1.0",
       "desc": "首个版本：支持 Vercel AI Gateway、流式翻译和思考模式。",
-      "sha256": "a0cb971445b95e445999e2379629e1cd8a08d24e4f2af2652b354384429d5fb7",
+      "sha256": "f07d1a2217ef2c6c0b3f3b88926122a82016d5ad4e194b2096c0ce2d07307cf1",
       "url": "https://raw.githubusercontent.com/eggx8/bob-plugin-vercel-ai-gateway/main/bobplugin/vercel-ai-gateway_0.1.0.bobplugin",
       "minBobVersion": "1.15.0",
       "timestamp": 1784709735000

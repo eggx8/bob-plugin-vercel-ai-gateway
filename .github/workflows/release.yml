@@ -27,4 +27,4 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" bobplugin/*.bobplugin --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" "bobplugin/vercel-ai-gateway_${GITHUB_REF_NAME#v}.bobplugin" --generate-notes --verify-tag

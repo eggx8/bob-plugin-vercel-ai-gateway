@@ -8,7 +8,7 @@ VERSION="$(node -e "const fs=require('fs'); process.stdout.write(JSON.parse(fs.r
 OUTPUT_DIR="${PROJECT_DIR}/bobplugin"
 OUTPUT_FILE="${OUTPUT_DIR}/vercel-ai-gateway_${VERSION}.bobplugin"
 STAGING_DIR="$(mktemp -d "${TMPDIR:-/tmp}/vercel-ai-gateway.XXXXXX")"
-RUNTIME_FILES=(info.json main.js languages.js icon.png)
+RUNTIME_FILES=(info.json main.js languages.js icon.png LICENSE NOTICE)
 
 cleanup() {
   rm -rf "${STAGING_DIR}"

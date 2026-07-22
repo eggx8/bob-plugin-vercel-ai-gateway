@@ -72,7 +72,7 @@ npm run package
 npm run update-languages
 ```
 
-打包产物位于 `bobplugin/`。压缩包根层只包含 Bob 运行所需文件，可直接安装。
+打包产物位于 `bobplugin/`。压缩包根层包含 Bob 运行所需文件及许可证声明，可直接安装。
 
 ## 发布
 

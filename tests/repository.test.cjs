@@ -49,7 +49,7 @@ test("icon is a 256 by 256 PNG", () => {
   assert.equal(png.readUInt32BE(20), 256);
 });
 
-test("installable package has a flat runtime-only layout and matching SHA-256", () => {
+test("installable package has a flat layout and matching SHA-256", () => {
   assert.ok(fs.existsSync(packagePath), `Missing ${packagePath}`);
   const files = execFileSync("unzip", ["-Z1", packagePath], {
     encoding: "utf8",
@@ -58,7 +58,14 @@ test("installable package has a flat runtime-only layout and matching SHA-256", 
     .split("\n")
     .sort();
 
-  assert.deepEqual(files, ["icon.png", "info.json", "languages.js", "main.js"]);
+  assert.deepEqual(files, [
+    "LICENSE",
+    "NOTICE",
+    "icon.png",
+    "info.json",
+    "languages.js",
+    "main.js",
+  ]);
 
   const sha256 = crypto
     .createHash("sha256")
