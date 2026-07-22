@@ -2,6 +2,13 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.2.0] - 2026-07-22
+
+### Changed
+
+- 深度思考改为“默认设置、启用思考、禁用思考”三态选项。
+- 默认设置沿用模型行为，启用与禁用模式分别显式发送 reasoning 参数。
+
 ## [0.1.0] - 2026-07-22
 
 ### Added

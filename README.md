@@ -25,7 +25,7 @@
 
 从 [Releases](https://github.com/eggx8/bob-plugin-vercel-ai-gateway/releases) 下载最新版 `.bobplugin`，双击完成安装。
 
-也可以直接下载仓库中的 [vercel-ai-gateway_0.1.0.bobplugin](bobplugin/vercel-ai-gateway_0.1.0.bobplugin)。
+也可以直接下载仓库中的 [vercel-ai-gateway_0.2.0.bobplugin](bobplugin/vercel-ai-gateway_0.2.0.bobplugin)。
 
 ## 配置
 
@@ -35,7 +35,7 @@
 | --- | --- | --- |
 | API Key | AI Gateway API Key，使用安全输入框保存 | 无 |
 | Model | `provider/model` 格式的模型 ID | `openai/gpt-5.4` |
-| 思考模式 | 请求并显示模型返回的 reasoning | 关闭 |
+| 深度思考 | 默认设置、启用思考或禁用思考 | 默认设置 |
 
 可用模型以 [AI Gateway Model List](https://vercel.com/ai-gateway/models) 为准。不同模型对 reasoning 的支持不同；不兼容时请关闭思考模式或更换模型。
 
@@ -47,9 +47,9 @@
 POST https://ai-gateway.vercel.sh/v1/chat/completions
 ```
 
-请求遵循 OpenAI Chat Completions 格式。译文从 `delta.content` 流式读取；开启思考模式时，`delta.reasoning` 会单独传给 Bob 的 `thinkInfo`，不会混入译文。
+请求遵循 OpenAI Chat Completions 格式。译文从 `delta.content` 流式读取；服务端返回的 `delta.reasoning` 会单独传给 Bob 的 `thinkInfo`，不会混入译文。
 
-关闭思考模式表示插件不主动请求或展示 reasoning。部分模型仍可能在服务端内部执行推理。
+`默认设置`不发送 reasoning 参数并沿用模型默认行为；`启用思考`显式发送 `reasoning.enabled: true`；`禁用思考`显式发送 `reasoning.enabled: false` 且不展示 reasoning。部分模型即使禁用输出，仍可能在服务端内部执行推理。
 
 ## 隐私与费用
 

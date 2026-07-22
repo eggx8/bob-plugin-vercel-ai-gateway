@@ -27,7 +27,8 @@ function translate(query, completion) {
 
   var apiKey = optionString("apiKey");
   var model = optionString("model");
-  var thinkingEnabled = optionString("thinkingMode") === "enable";
+  var thinkingMode = optionString("thinkingMode") || "default";
+  var showReasoning = thinkingMode !== "disable";
   var sourceText =
     typeof query.originalText === "string" && query.originalText.length > 0
       ? query.originalText
@@ -82,8 +83,10 @@ function translate(query, completion) {
     stream: true,
   };
 
-  if (thinkingEnabled) {
+  if (thinkingMode === "enable") {
     requestBody.reasoning = { enabled: true };
+  } else if (thinkingMode === "disable") {
+    requestBody.reasoning = { enabled: false };
   }
 
   function buildResult() {
@@ -93,7 +96,7 @@ function translate(query, completion) {
       toParagraphs: translatedText ? [translatedText] : [],
     };
 
-    if (thinkingEnabled && reasoningText) {
+    if (showReasoning && reasoningText) {
       result.thinkInfo = { content: reasoningText };
     }
 
@@ -186,7 +189,7 @@ function translate(query, completion) {
     }
 
     var changed = false;
-    if (thinkingEnabled && typeof delta.reasoning === "string") {
+    if (showReasoning && typeof delta.reasoning === "string") {
       reasoningText += delta.reasoning;
       changed = true;
     }

@@ -2,6 +2,14 @@
   "identifier": "com.eggx8.translate.vercelaigateway",
   "versions": [
     {
+      "version": "0.2.0",
+      "desc": "深度思考支持默认设置、启用思考和禁用思考三种模式。",
+      "sha256": "7f9ea142f1ebd5d513b4ea77da98a8d1e2be16785a535a9e1ffdbfc762af76e5",
+      "url": "https://raw.githubusercontent.com/eggx8/bob-plugin-vercel-ai-gateway/main/bobplugin/vercel-ai-gateway_0.2.0.bobplugin",
+      "minBobVersion": "1.15.0",
+      "timestamp": 1784715423000
+    },
+    {
       "version": "0.1.0",
       "desc": "首个版本：支持 Vercel AI Gateway、流式翻译和思考模式。",
       "sha256": "f07d1a2217ef2c6c0b3f3b88926122a82016d5ad4e194b2096c0ce2d07307cf1",

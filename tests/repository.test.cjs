@@ -38,9 +38,14 @@ test("plugin metadata and public update metadata stay aligned", () => {
   );
   assert.equal(apiKey.textConfig.type, "secure");
   assert.equal(model.defaultValue, "openai/gpt-5.4");
+  assert.equal(thinkingMode.defaultValue, "default");
   assert.deepEqual(
     thinkingMode.menuValues.map((item) => item.value),
-    ["disable", "enable"],
+    ["default", "enable", "disable"],
+  );
+  assert.deepEqual(
+    thinkingMode.menuValues.map((item) => item.title),
+    ["默认设置", "启用思考", "禁用思考"],
   );
 });
 

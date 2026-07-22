@@ -14,7 +14,8 @@ function createHarness(options = {}) {
     $option: {
       apiKey: options.apiKey === undefined ? "test-key" : options.apiKey,
       model: options.model === undefined ? "openai/gpt-5.4" : options.model,
-      thinkingMode: options.thinkingMode || "disable",
+      thinkingMode:
+        options.thinkingMode === undefined ? "default" : options.thinkingMode,
     },
     $http: {
       streamRequest(value) {
@@ -132,6 +133,53 @@ test("parses fragmented SSE and separates reasoning from translation", () => {
   };
   assert.deepEqual(state.streams.at(-1), expectedResult);
   assert.deepEqual(state.completions, [{ result: expectedResult }]);
+});
+
+test("uses provider-default reasoning when the mode is default", () => {
+  const harness = createHarness();
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  assert.equal(harness.request.body.reasoning, undefined);
+  harness.request.streamHandler({
+    text: [
+      'data: {"choices":[{"delta":{"reasoning":"模型默认思考"}}]}',
+      'data: {"choices":[{"delta":{"content":"你好"}}]}',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}',
+      "",
+    ].join("\n\n"),
+  });
+  harness.request.handler({ response: { statusCode: 200 } });
+
+  assert.deepEqual(state.completions[0].result, {
+    from: "en",
+    to: "zh-Hans",
+    toParagraphs: ["你好"],
+    thinkInfo: { content: "模型默认思考" },
+  });
+});
+
+test("explicitly disables reasoning and does not display it", () => {
+  const harness = createHarness({ thinkingMode: "disable" });
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  assert.deepEqual(normalize(harness.request.body.reasoning), { enabled: false });
+  harness.request.streamHandler({
+    text: [
+      'data: {"choices":[{"delta":{"reasoning":"不应显示"}}]}',
+      'data: {"choices":[{"delta":{"content":"你好"}}]}',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}',
+      "",
+    ].join("\n\n"),
+  });
+  harness.request.handler({ response: { statusCode: 200 } });
+
+  assert.deepEqual(state.completions[0].result, {
+    from: "en",
+    to: "zh-Hans",
+    toParagraphs: ["你好"],
+  });
 });
 
 test("streams CR-only SSE and handles CRLF split between chunks", () => {

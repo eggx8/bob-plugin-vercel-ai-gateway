@@ -1,6 +1,6 @@
 {
   "identifier": "com.eggx8.translate.vercelaigateway",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "translate",
   "name": "Vercel AI Gateway",
   "summary": "通过 Vercel AI Gateway 调用大模型进行流式翻译。",
@@ -31,16 +31,20 @@
     {
       "identifier": "thinkingMode",
       "type": "menu",
-      "title": "思考模式",
-      "defaultValue": "disable",
+      "title": "深度思考",
+      "defaultValue": "default",
       "menuValues": [
         {
-          "title": "关闭",
-          "value": "disable"
+          "title": "默认设置",
+          "value": "default"
         },
         {
-          "title": "开启",
+          "title": "启用思考",
           "value": "enable"
+        },
+        {
+          "title": "禁用思考",
+          "value": "disable"
         }
       ]
     }
