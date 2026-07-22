@@ -2,6 +2,13 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.1] - 2026-07-22
+
+### Fixed
+
+- 兼容 `reasoning_content` 流式思考增量，避免推理模型在译文生成前长时间无输出
+- 禁用流式响应压缩和缓存，降低 SSE 数据被客户端缓冲的可能
+
 ## [0.3.0] - 2026-07-22
 
 ### Added

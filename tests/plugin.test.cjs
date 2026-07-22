@@ -105,6 +105,9 @@ test("builds the minimal Gateway request and preserves original formatting", () 
   assert.equal(harness.request.url, "https://ai-gateway.vercel.sh/v1/chat/completions");
   assert.equal(harness.request.method, "POST");
   assert.equal(harness.request.header.Authorization, "Bearer test-key");
+  assert.equal(harness.request.header.Accept, "text/event-stream");
+  assert.equal(harness.request.header["Accept-Encoding"], "identity");
+  assert.equal(harness.request.header["Cache-Control"], "no-cache");
   assert.equal(harness.request.header["Content-Type"], "application/json");
   assert.equal(harness.request.body.model, "poolside/laguna-s-2.1-free");
   assert.equal(harness.request.body.stream, true);
@@ -124,7 +127,7 @@ test("parses fragmented SSE and separates reasoning from translation", () => {
   const stream = [
     'data: {"choices":[{"delta":{"reasoning":"先分析"}}]}\r\n\r\n',
     'data: {"choices":[{"delta":{"content":"你好"}}]}\n\n',
-    'data: {"choices":[{"delta":{"reasoning":"再确认","content":"，世界"}}]}\n\n',
+    'data: {"choices":[{"delta":{"reasoning_content":"再确认","content":"，世界"}}]}\n\n',
     'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
     "data: [DONE]\n\n",
   ].join("");
@@ -146,6 +149,59 @@ test("parses fragmented SSE and separates reasoning from translation", () => {
   };
   assert.deepEqual(state.streams.at(-1), expectedResult);
   assert.deepEqual(state.completions, [{ result: expectedResult }]);
+});
+
+test("streams reasoning_content before translated content arrives", () => {
+  const harness = createHarness({ thinkingMode: "enable" });
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  harness.request.streamHandler({
+    text: 'data: {"choices":[{"delta":{"reasoning_content":"正在分析"}}]}\n\n',
+  });
+
+  assert.deepEqual(state.streams, [
+    {
+      from: "en",
+      to: "zh-Hans",
+      toParagraphs: [],
+      thinkInfo: { content: "正在分析" },
+    },
+  ]);
+
+  harness.request.streamHandler({
+    text: [
+      'data: {"choices":[{"delta":{"content":"你好"}}]}',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}',
+      "",
+    ].join("\n\n"),
+  });
+  harness.request.handler({ response: { statusCode: 200 } });
+
+  assert.deepEqual(state.completions[0].result, {
+    from: "en",
+    to: "zh-Hans",
+    toParagraphs: ["你好"],
+    thinkInfo: { content: "正在分析" },
+  });
+});
+
+test("does not duplicate reasoning when both field variants are present", () => {
+  const harness = createHarness();
+  const state = createQuery();
+  harness.context.translate(state.query);
+
+  harness.request.streamHandler({
+    text: [
+      'data: {"choices":[{"delta":{"reasoning":"标准字段","reasoning_content":"兼容字段"}}]}',
+      'data: {"choices":[{"delta":{"content":"你好"}}]}',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}',
+      "",
+    ].join("\n\n"),
+  });
+  harness.request.handler({ response: { statusCode: 200 } });
+
+  assert.equal(state.completions[0].result.thinkInfo.content, "标准字段");
 });
 
 test("uses provider-default reasoning when the mode is default", () => {

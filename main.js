@@ -270,8 +270,14 @@ function translate(query, completion) {
     }
 
     var changed = false;
-    if (showReasoning && typeof delta.reasoning === "string") {
-      reasoningText += delta.reasoning;
+    var reasoningDelta =
+      typeof delta.reasoning === "string" && delta.reasoning
+        ? delta.reasoning
+        : typeof delta.reasoning_content === "string"
+          ? delta.reasoning_content
+          : "";
+    if (showReasoning && reasoningDelta) {
+      reasoningText += reasoningDelta;
       changed = true;
     }
 
@@ -332,6 +338,8 @@ function translate(query, completion) {
       header: {
         Authorization: "Bearer " + apiKey,
         Accept: "text/event-stream",
+        "Accept-Encoding": "identity",
+        "Cache-Control": "no-cache",
         "Content-Type": "application/json",
       },
       body: requestBody,

@@ -26,7 +26,7 @@
 
 从 [Releases](https://github.com/eggx8/bob-plugin-vercel-ai-gateway/releases) 下载最新版 `.bobplugin`，双击完成安装。
 
-也可以直接下载仓库中的 [vercel-ai-gateway_0.3.0.bobplugin](bobplugin/vercel-ai-gateway_0.3.0.bobplugin)。
+也可以直接下载仓库中的 [vercel-ai-gateway_0.3.1.bobplugin](bobplugin/vercel-ai-gateway_0.3.1.bobplugin)。
 
 ## 配置
 
@@ -48,7 +48,7 @@
 POST https://ai-gateway.vercel.sh/v1/chat/completions
 ```
 
-请求遵循 OpenAI Chat Completions 格式。译文从 `delta.content` 流式读取；服务端返回的 `delta.reasoning` 会单独传给 Bob 的 `thinkInfo`，不会混入译文。
+请求遵循 OpenAI Chat Completions 格式。译文从 `delta.content` 流式读取；服务端返回的 `delta.reasoning` 或 `delta.reasoning_content` 会单独传给 Bob 的 `thinkInfo`，不会混入译文。
 
 `默认设置`不发送 reasoning 参数并沿用模型默认行为；`启用思考`显式发送 `reasoning.enabled: true`；`禁用思考`显式发送 `reasoning.enabled: false` 且不展示 reasoning。部分模型即使禁用输出，仍可能在服务端内部执行推理。
 
