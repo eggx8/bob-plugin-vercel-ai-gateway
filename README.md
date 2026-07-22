@@ -59,17 +59,17 @@ POST https://ai-gateway.vercel.sh/v1/chat/completions
 
 ## 开发
 
-项目无 npm 运行依赖。Node.js 仅用于测试、同步语言表和打包。
+插件没有运行依赖。开发、测试和打包统一使用 pnpm；Node.js 仅用于这些开发任务。
 
 ```bash
-npm test
-npm run package
+pnpm test
+pnpm run package
 ```
 
 刷新 Bob 官方语言表：
 
 ```bash
-npm run update-languages
+pnpm run update-languages
 ```
 
 打包产物位于 `bobplugin/`。压缩包根层包含 Bob 运行所需文件及许可证声明，可直接安装。

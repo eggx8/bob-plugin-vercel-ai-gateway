@@ -23,6 +23,8 @@ test("plugin metadata and public update metadata stay aligned", () => {
   assert.equal(appcast.versions[0].version, info.version);
   assert.equal(appcast.versions[0].minBobVersion, info.minBobVersion);
   assert.equal(packageMetadata.version, info.version);
+  assert.equal(packageMetadata.packageManager, "pnpm@10.33.0");
+  assert.ok(fs.existsSync(path.join(projectRoot, "pnpm-lock.yaml")));
   assert.equal(typeof appcast.versions[0].timestamp, "number");
   assert.equal(
     path.basename(new URL(appcast.versions[0].url).pathname),
@@ -40,6 +42,20 @@ test("plugin metadata and public update metadata stay aligned", () => {
     thinkingMode.menuValues.map((item) => item.value),
     ["disable", "enable"],
   );
+});
+
+test("development documentation and workflows use pnpm", () => {
+  const files = [
+    "CONTRIBUTING.md",
+    "README.md",
+    ".github/workflows/ci.yml",
+    ".github/workflows/release.yml",
+  ];
+
+  for (const file of files) {
+    const contents = fs.readFileSync(path.join(projectRoot, file), "utf8");
+    assert.doesNotMatch(contents, /\bnpm\b/i);
+  }
 });
 
 test("icon is a 256 by 256 PNG", () => {
