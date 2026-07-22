@@ -1,0 +1,72 @@
+const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+const { execFileSync } = require("node:child_process");
+
+const projectRoot = path.resolve(__dirname, "..");
+const info = readJson("info.json");
+const appcast = readJson("appcast.json");
+const packageMetadata = readJson("package.json");
+const packagePath = path.join(
+  projectRoot,
+  "bobplugin",
+  `vercel-ai-gateway_${info.version}.bobplugin`,
+);
+
+test("plugin metadata and public update metadata stay aligned", () => {
+  assert.match(info.identifier, /^[a-z0-9.]+$/);
+  assert.equal(info.category, "translate");
+  assert.equal(info.minBobVersion, "1.15.0");
+  assert.equal(appcast.identifier, info.identifier);
+  assert.equal(appcast.versions[0].version, info.version);
+  assert.equal(appcast.versions[0].minBobVersion, info.minBobVersion);
+  assert.equal(packageMetadata.version, info.version);
+  assert.equal(typeof appcast.versions[0].timestamp, "number");
+  assert.equal(
+    path.basename(new URL(appcast.versions[0].url).pathname),
+    path.basename(packagePath),
+  );
+
+  const apiKey = info.options.find((option) => option.identifier === "apiKey");
+  const model = info.options.find((option) => option.identifier === "model");
+  const thinkingMode = info.options.find(
+    (option) => option.identifier === "thinkingMode",
+  );
+  assert.equal(apiKey.textConfig.type, "secure");
+  assert.equal(model.defaultValue, "openai/gpt-5.4");
+  assert.deepEqual(
+    thinkingMode.menuValues.map((item) => item.value),
+    ["disable", "enable"],
+  );
+});
+
+test("icon is a 256 by 256 PNG", () => {
+  const png = fs.readFileSync(path.join(projectRoot, "icon.png"));
+  assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(png.readUInt32BE(16), 256);
+  assert.equal(png.readUInt32BE(20), 256);
+});
+
+test("installable package has a flat runtime-only layout and matching SHA-256", () => {
+  assert.ok(fs.existsSync(packagePath), `Missing ${packagePath}`);
+  const files = execFileSync("unzip", ["-Z1", packagePath], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .sort();
+
+  assert.deepEqual(files, ["icon.png", "info.json", "languages.js", "main.js"]);
+
+  const sha256 = crypto
+    .createHash("sha256")
+    .update(fs.readFileSync(packagePath))
+    .digest("hex");
+  assert.equal(appcast.versions[0].sha256, sha256);
+});
+
+function readJson(relativePath) {
+  return JSON.parse(fs.readFileSync(path.join(projectRoot, relativePath), "utf8"));
+}

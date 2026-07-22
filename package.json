@@ -1,0 +1,25 @@
+{
+  "name": "bob-plugin-vercel-ai-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A minimal Bob translation plugin for Vercel AI Gateway.",
+  "author": "eggx8",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eggx8/bob-plugin-vercel-ai-gateway.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eggx8/bob-plugin-vercel-ai-gateway/issues"
+  },
+  "homepage": "https://github.com/eggx8/bob-plugin-vercel-ai-gateway#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "node --check main.js && node --check languages.js && node --test",
+    "test": "node --test",
+    "package": "bash scripts/package.sh",
+    "update-languages": "node scripts/update-languages.mjs"
+  }
+}

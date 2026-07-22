@@ -1,0 +1,48 @@
+{
+  "identifier": "com.eggx8.translate.vercelaigateway",
+  "version": "0.1.0",
+  "category": "translate",
+  "name": "Vercel AI Gateway",
+  "summary": "通过 Vercel AI Gateway 调用大模型进行流式翻译。",
+  "author": "eggx8",
+  "homepage": "https://github.com/eggx8/bob-plugin-vercel-ai-gateway",
+  "appcast": "https://raw.githubusercontent.com/eggx8/bob-plugin-vercel-ai-gateway/main/appcast.json",
+  "minBobVersion": "1.15.0",
+  "options": [
+    {
+      "identifier": "apiKey",
+      "type": "text",
+      "title": "API Key",
+      "textConfig": {
+        "type": "secure",
+        "placeholderText": "AI_GATEWAY_API_KEY"
+      }
+    },
+    {
+      "identifier": "model",
+      "type": "text",
+      "title": "Model",
+      "defaultValue": "openai/gpt-5.4",
+      "textConfig": {
+        "type": "visible",
+        "placeholderText": "provider/model"
+      }
+    },
+    {
+      "identifier": "thinkingMode",
+      "type": "menu",
+      "title": "思考模式",
+      "defaultValue": "disable",
+      "menuValues": [
+        {
+          "title": "关闭",
+          "value": "disable"
+        },
+        {
+          "title": "开启",
+          "value": "enable"
+        }
+      ]
+    }
+  ]
+}

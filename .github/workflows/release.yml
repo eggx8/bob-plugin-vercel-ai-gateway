@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Verify release tag
+        run: node -e "const v=require('./info.json').version; if (process.env.GITHUB_REF_NAME !== 'v' + v) throw new Error('Release tag must be v' + v)"
+      - name: Verify repository
+        run: npm run check
+      - name: Rebuild package
+        run: npm run package
+      - name: Verify package is reproducible
+        run: git diff --exit-code -- bobplugin
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" bobplugin/*.bobplugin --generate-notes --verify-tag
