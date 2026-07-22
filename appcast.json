@@ -2,6 +2,14 @@
   "identifier": "com.eggx8.translate.vercelaigateway",
   "versions": [
     {
+      "version": "0.3.0",
+      "desc": "新增 Bob 原生配置验证，默认模型改为 poolside/laguna-s-2.1-free，并优化中文文案",
+      "sha256": "bbdb6d5178e5f8fe2bf70359b436d2884d85a52ad955c1f825bb82bbe41fafc0",
+      "url": "https://raw.githubusercontent.com/eggx8/bob-plugin-vercel-ai-gateway/main/bobplugin/vercel-ai-gateway_0.3.0.bobplugin",
+      "minBobVersion": "1.15.0",
+      "timestamp": 1784716009000
+    },
+    {
       "version": "0.2.0",
       "desc": "深度思考支持默认设置、启用思考和禁用思考三种模式。",
       "sha256": "7f9ea142f1ebd5d513b4ea77da98a8d1e2be16785a535a9e1ffdbfc762af76e5",

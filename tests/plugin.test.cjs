@@ -10,14 +10,24 @@ const languages = require(path.join(projectRoot, "languages.js"));
 
 function createHarness(options = {}) {
   let request;
+  let validationRequest;
   const context = {
     $option: {
       apiKey: options.apiKey === undefined ? "test-key" : options.apiKey,
-      model: options.model === undefined ? "openai/gpt-5.4" : options.model,
+      model:
+        options.model === undefined
+          ? "poolside/laguna-s-2.1-free"
+          : options.model,
       thinkingMode:
         options.thinkingMode === undefined ? "default" : options.thinkingMode,
     },
     $http: {
+      request(value) {
+        if (options.requestError) {
+          throw options.requestError;
+        }
+        validationRequest = value;
+      },
       streamRequest(value) {
         if (options.requestError) {
           throw options.requestError;
@@ -40,6 +50,9 @@ function createHarness(options = {}) {
     context,
     get request() {
       return request;
+    },
+    get validationRequest() {
+      return validationRequest;
     },
   };
 }
@@ -93,7 +106,7 @@ test("builds the minimal Gateway request and preserves original formatting", () 
   assert.equal(harness.request.method, "POST");
   assert.equal(harness.request.header.Authorization, "Bearer test-key");
   assert.equal(harness.request.header["Content-Type"], "application/json");
-  assert.equal(harness.request.body.model, "openai/gpt-5.4");
+  assert.equal(harness.request.body.model, "poolside/laguna-s-2.1-free");
   assert.equal(harness.request.body.stream, true);
   assert.equal(harness.request.body.reasoning, undefined);
   assert.match(harness.request.body.messages[1].content, /English to Chinese \(Simplified\)/);
@@ -214,6 +227,41 @@ test("reports missing credentials without starting a request", () => {
   assert.equal(harness.request, undefined);
   assert.equal(state.completions.length, 1);
   assert.equal(state.completions[0].error.type, "secretKey");
+});
+
+test("supports Bob native validation for credentials and model access", () => {
+  const missing = createHarness({ apiKey: "  " });
+  const missingResults = [];
+  missing.context.pluginValidate((value) => missingResults.push(normalize(value)));
+  assert.equal(missing.validationRequest, undefined);
+  assert.equal(missingResults[0].result, false);
+  assert.equal(missingResults[0].error.type, "secretKey");
+
+  const harness = createHarness();
+  const results = [];
+  harness.context.pluginValidate((value) => results.push(normalize(value)));
+  assert.equal(harness.validationRequest.method, "POST");
+  assert.equal(harness.validationRequest.body.model, "poolside/laguna-s-2.1-free");
+  assert.equal(harness.validationRequest.body.stream, false);
+  harness.validationRequest.handler({
+    data: { choices: [{ message: { content: "OK" } }] },
+    response: { statusCode: 200 },
+  });
+  assert.deepEqual(results, [{ result: true }]);
+});
+
+test("maps validation failures to Bob service errors", () => {
+  const harness = createHarness();
+  const results = [];
+  harness.context.pluginValidate((value) => results.push(normalize(value)));
+  harness.validationRequest.handler({
+    data: { error: { message: "invalid token", code: "unauthorized" } },
+    response: { statusCode: 401 },
+  });
+
+  assert.equal(results[0].result, false);
+  assert.equal(results[0].error.type, "secretKey");
+  assert.equal(results[0].error.troubleshootingLink, "https://vercel.com/ai-gateway");
 });
 
 test("maps HTTP authentication and model errors", () => {

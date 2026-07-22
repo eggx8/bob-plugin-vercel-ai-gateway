@@ -36,8 +36,11 @@ test("plugin metadata and public update metadata stay aligned", () => {
   const thinkingMode = info.options.find(
     (option) => option.identifier === "thinkingMode",
   );
+  assert.doesNotMatch(info.summary, /[。！？]$/);
   assert.equal(apiKey.textConfig.type, "secure");
-  assert.equal(model.defaultValue, "openai/gpt-5.4");
+  assert.equal(model.title, "模型");
+  assert.equal(model.defaultValue, "poolside/laguna-s-2.1-free");
+  assert.equal(thinkingMode.title, "深度思考");
   assert.equal(thinkingMode.defaultValue, "default");
   assert.deepEqual(
     thinkingMode.menuValues.map((item) => item.value),
@@ -46,6 +49,10 @@ test("plugin metadata and public update metadata stay aligned", () => {
   assert.deepEqual(
     thinkingMode.menuValues.map((item) => item.title),
     ["默认设置", "启用思考", "禁用思考"],
+  );
+  assert.match(
+    fs.readFileSync(path.join(projectRoot, "main.js"), "utf8"),
+    /function pluginValidate\(completion\)/,
   );
 });
 

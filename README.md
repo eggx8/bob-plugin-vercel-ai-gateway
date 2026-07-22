@@ -12,7 +12,8 @@
 
 - 使用一个 AI Gateway API Key 调用 Vercel 支持的模型
 - 流式显示译文
-- 可选思考模式，并在 Bob 原生思考区域显示 reasoning
+- 可选深度思考，并在 Bob 原生思考区域显示 reasoning
+- 支持 Bob 原生配置验证
 - 支持 Bob 1.20.0 官方定义的 390 种语言代码
 - 不依赖 Node.js、浏览器 API 或第三方运行库
 
@@ -25,7 +26,7 @@
 
 从 [Releases](https://github.com/eggx8/bob-plugin-vercel-ai-gateway/releases) 下载最新版 `.bobplugin`，双击完成安装。
 
-也可以直接下载仓库中的 [vercel-ai-gateway_0.2.0.bobplugin](bobplugin/vercel-ai-gateway_0.2.0.bobplugin)。
+也可以直接下载仓库中的 [vercel-ai-gateway_0.3.0.bobplugin](bobplugin/vercel-ai-gateway_0.3.0.bobplugin)。
 
 ## 配置
 
@@ -34,10 +35,10 @@
 | 选项 | 说明 | 默认值 |
 | --- | --- | --- |
 | API Key | AI Gateway API Key，使用安全输入框保存 | 无 |
-| Model | `provider/model` 格式的模型 ID | `openai/gpt-5.4` |
+| 模型 | `provider/model` 格式的模型 ID | `poolside/laguna-s-2.1-free` |
 | 深度思考 | 默认设置、启用思考或禁用思考 | 默认设置 |
 
-可用模型以 [AI Gateway Model List](https://vercel.com/ai-gateway/models) 为准。不同模型对 reasoning 的支持不同；不兼容时请关闭思考模式或更换模型。
+可用模型以 [AI Gateway Model List](https://vercel.com/ai-gateway/models) 为准。不同模型对 reasoning 的支持不同；不兼容时请选择“禁用思考”或更换模型。
 
 ## 工作方式
 
